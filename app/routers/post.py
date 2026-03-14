@@ -3,18 +3,19 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from .. import models, schemas, oauth2
+from .. import models, oauth2, schemas
 from ..database import get_db
 
-router = APIRouter(
-    prefix="/posts",
-    tags=["Posts"]
-)
+router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 # --- СОЗДАНИЕ ПОСТА ---
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
-async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+async def create_post(
+    post: schemas.PostCreate,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
     # cursor.execute(
     #     """INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING * """,
     #     (post.title, post.content, post.published),
@@ -32,19 +33,32 @@ async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), c
 
 # --- ПОЛУЧЕНИЕ ВСЕХ ПОСТОВ ---
 @router.get("/", response_model=List[schemas.Post])
-async def get_posts(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, search: Optional[str] = ""):
+async def get_posts(
+    db: Session = Depends(get_db),
+    limit: int = 10,
+    skip: int = 0,
+    search: Optional[str] = "",
+):
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
     print(limit)
-    
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).offset(skip).limit(limit).all()
+
+    posts = (
+        db.query(models.Post)
+        .filter(models.Post.title.contains(search))
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
     return posts
 
 
 # --- ПОЛУЧЕНИЕ ОДНОГО ПОСТА ---
 @router.get("/{post_id}", response_model=schemas.Post)
-async def get_post(post_id: int, db: Session = Depends(get_db)):  # FastAPI сам сконвертирует post_id в int
+async def get_post(
+    post_id: int, db: Session = Depends(get_db)
+):  # FastAPI сам сконвертирует post_id в int
     # Используем кортеж (post_id,) — запятая обязательна для одного элемента!
     # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (post_id,))
     # post = cursor.fetchone()
@@ -61,7 +75,11 @@ async def get_post(post_id: int, db: Session = Depends(get_db)):  # FastAPI са
 
 # --- УДАЛЕНИЕ ПОСТА ---
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_post(post_id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
+async def delete_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+):
     # Пытаемся удалить и вернуть удаленную запись, чтобы проверить, была ли она
     # cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING *""", (post_id,))
     # deleted_post = cursor.fetchone()
@@ -75,8 +93,10 @@ async def delete_post(post_id: int, db: Session = Depends(get_db), current_user:
             detail=f"Post with id: {post_id} doesn't exist",
         )
     if post.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Not authorized to perform requested action")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action",
+        )
 
     post_query.delete(synchronize_session=False)
     db.commit()
@@ -88,7 +108,10 @@ async def delete_post(post_id: int, db: Session = Depends(get_db), current_user:
 # --- ОБНОВЛЕНИЕ ПОСТА ---
 @router.put("/{post_id}", response_model=schemas.Post)
 async def update_post(
-    post_id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)
+    post_id: int,
+    updated_post: schemas.PostCreate,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
 ):
     # cursor.execute(
     #     """UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""",
@@ -104,8 +127,10 @@ async def update_post(
             detail=f"Post with id: {post_id} doesn't exist",
         )
     if post.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Not authorized to perform requested action")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action",
+        )
 
     post_query.update(updated_post.dict(), synchronize_session=False)
     db.commit()
