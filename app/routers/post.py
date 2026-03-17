@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .. import models, oauth2, schemas
@@ -32,7 +33,8 @@ async def create_post(
 
 
 # --- ПОЛУЧЕНИЕ ВСЕХ ПОСТОВ ---
-@router.get("/", response_model=List[schemas.Post])
+# @router.get("/", response_model=List[schemas.Post])
+@router.get("/", response_model=List[schemas.PostOut])
 async def get_posts(
     db: Session = Depends(get_db),
     limit: int = 10,
@@ -41,29 +43,42 @@ async def get_posts(
 ):
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
-    print(limit)
 
+    # posts = (
+    #     db.query(models.Post)
+    #     .filter(models.Post.title.contains(search)).offset(skip).limit(limit).all()
+    # )
+
+    # В твоем запросе в post.py
     posts = (
-        db.query(models.Post)
-        .filter(models.Post.title.contains(search))
-        .offset(skip)
-        .limit(limit)
-        .all()
+        db.query(models.Post, func.count(models.Vote.post_id).label("votes")) # Поменяй post_votes на votes
+        .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
+        .group_by(models.Post.id)
+        .filter(models.Post.title.contains(search)).offset(skip).limit(limit).all()
     )
 
     return posts
 
 
 # --- ПОЛУЧЕНИЕ ОДНОГО ПОСТА ---
-@router.get("/{post_id}", response_model=schemas.Post)
+# @router.get("/{post_id}", response_model=schemas.Post)
+@router.get("/{post_id}", response_model=schemas.PostOut)
 async def get_post(
     post_id: int, db: Session = Depends(get_db)
 ):  # FastAPI сам сконвертирует post_id в int
     # Используем кортеж (post_id,) — запятая обязательна для одного элемента!
     # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (post_id,))
     # post = cursor.fetchone()
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    # post = db.query(models.Post).filter(models.Post.id == post_id).first()
 
+    post = (
+        db.query(models.Post, func.count(models.Vote.post_id).label("votes"))
+        .join(models.Vote, models.Post.id == models.Vote.post_id, isouter=True)
+        .filter(models.Post.id == post_id)  # <--- ВОТ ЭТОТ ФИКС
+        .group_by(models.Post.id)
+        .first()
+    )
+    
     if not post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

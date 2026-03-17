@@ -34,6 +34,13 @@ class Post(PostBase):
     class Config:
         orm_mode = True
 
+# Правильный вариант
+class PostOut(BaseModel):
+    Post: Post  # Это вложенная схема со всеми полями поста
+    votes: int  # Это наше число голосов
+
+    class Config:
+        from_attributes = True # Для Pydantic v2 (или orm_mode = True для v1)
 
 class UserCreate(BaseModel):
     email: EmailStr
