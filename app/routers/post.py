@@ -67,6 +67,7 @@ async def get_post(
     post_id: int, db: Session = Depends(get_db)
 ):  # FastAPI сам сконвертирует post_id в int
     # Используем кортеж (post_id,) — запятая обязательна для одного элемента!
+    
     # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (post_id,))
     # post = cursor.fetchone()
     # post = db.query(models.Post).filter(models.Post.id == post_id).first()
