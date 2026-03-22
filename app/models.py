@@ -24,7 +24,8 @@ class Post(Base):
     category_id = Column(
         Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=True
     )
-    category = relationship("Category")
+    # Добавляем back_populates, указывая имя атрибута в модели Category
+    category = relationship("Category", back_populates="posts")
 
 
 class User(Base):
@@ -58,5 +59,6 @@ class Category(Base):
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
-    posts = relationship("Post")
+    # Добавляем back_populates, указывая имя атрибута в модели Post
+    posts = relationship("Post", back_populates="category")
     

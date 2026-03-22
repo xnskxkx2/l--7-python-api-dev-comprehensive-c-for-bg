@@ -9,7 +9,7 @@ from ..database import get_db
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 
-
+# Создание категории
 @router.post(
     "/", status_code=status.HTTP_201_CREATED, response_model=schemas.CategoryOut
 )
