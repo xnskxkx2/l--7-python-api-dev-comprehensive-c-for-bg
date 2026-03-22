@@ -13,7 +13,7 @@ class PostBase(BaseModel):
 
 class PostCreate(PostBase):
     owner_id: int
-    category_id: int
+    category_id: Optional[int] = None
     pass
 
 
