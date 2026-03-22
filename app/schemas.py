@@ -46,7 +46,7 @@ class Post(PostBase):
     created_at: datetime
     owner_id: int
     owner: UserOut
-    category: CategoryOut
+    category: Optional[CategoryOut] = None
 
     class Config:
         from_attributes = True
