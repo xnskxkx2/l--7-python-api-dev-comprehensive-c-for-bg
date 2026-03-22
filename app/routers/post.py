@@ -24,7 +24,7 @@ async def create_post(
     # new_post = cursor.fetchone()
     # conn.commit()
     print(current_user.email)
-    new_post = models.Post(**post.dict())
+    new_post = models.Post(**post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -148,7 +148,7 @@ async def update_post(
             detail="Not authorized to perform requested action",
         )
 
-    post_query.update(updated_post.dict(), synchronize_session=False)
+    post_query.update(updated_post.model_dump(), synchronize_session=False)
     db.commit()
     # conn.commit()
 

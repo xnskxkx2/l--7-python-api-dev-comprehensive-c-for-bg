@@ -13,8 +13,24 @@ class PostBase(BaseModel):
 
 class PostCreate(PostBase):
     owner_id: int
+    category_id: int
     pass
 
+
+class CategoryBase(BaseModel):
+    name: str
+
+
+class CategoryCreate(CategoryBase):
+    pass
+
+class CategoryOut(BaseModel):
+    id: int
+    name: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True # Для Pydantic v2 (или orm_mode = True для v1)
 
 class UserOut(BaseModel):
     id: int
@@ -22,7 +38,7 @@ class UserOut(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Post(PostBase):
@@ -30,9 +46,10 @@ class Post(PostBase):
     created_at: datetime
     owner_id: int
     owner: UserOut
+    category: CategoryOut
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Правильный вариант
 class PostOut(BaseModel):
@@ -41,6 +58,7 @@ class PostOut(BaseModel):
 
     class Config:
         from_attributes = True # Для Pydantic v2 (или orm_mode = True для v1)
+
 
 class UserCreate(BaseModel):
     email: EmailStr
