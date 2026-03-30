@@ -1,0 +1,33 @@
+server {
+    # Прослушиваем HTTP на всех интерфейсах
+    listen 80;
+    listen [::]:80;
+
+    # Укажи здесь домен своего сайта
+    server_name _;                    # замени на свой домен, например: example.com
+
+    location / {
+        # Передаём все запросы на Gunicorn
+        proxy_pass http://localhost:8000;
+
+        # Рекомендуемые заголовки для корректной работы
+        proxy_http_version 1.1;
+        
+        # Передаём реальный IP клиента
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        # Поддержка WebSocket (если нужно)
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        
+        # Передаём оригинальный Host
+        proxy_set_header Host $http_host;
+        
+        # Дополнительный заголовок, чтобы бэкенд понимал, что запрос идёт через прокси
+        proxy_set_header X-Nginx-Proxy true;
+
+        # Отключаем автоматический редирект
+        proxy_redirect off;
+    }
+}

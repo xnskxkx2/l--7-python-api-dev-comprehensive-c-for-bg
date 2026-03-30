@@ -27,4 +27,4 @@ app.include_router(category.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "It's a bad day today"}
