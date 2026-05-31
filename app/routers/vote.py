@@ -19,6 +19,12 @@ def vote(
             detail=f"Post with id: {vote.post_id} doesn't exist",
         )
 
+    if post.owner_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot vote on your own post",
+        )
+
     vote_query = db.query(models.Vote).filter(
         models.Vote.post_id == vote.post_id, models.Vote.user_id == current_user.id
     )

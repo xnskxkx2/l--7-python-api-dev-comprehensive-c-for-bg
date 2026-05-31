@@ -9,6 +9,7 @@ from ..database import get_db
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 
+
 # Создание категории
 @router.post(
     "/", status_code=status.HTTP_201_CREATED, response_model=schemas.CategoryOut
@@ -25,18 +26,16 @@ async def create_category(
 
     return new_category
 
+
 # Получение всех категорий
 @router.get("/", response_model=List[schemas.CategoryOut])
 async def get_categories(
     db: Session = Depends(get_db),
 ):
-
-    categories = (
-        db.query(models.Category)
-        .all()
-    )
+    categories = db.query(models.Category).all()
 
     return categories
+
 
 # Получение всех постов категории
 @router.get("/{category_id}/posts", response_model=List[schemas.Post])

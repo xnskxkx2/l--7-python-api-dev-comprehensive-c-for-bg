@@ -24,7 +24,7 @@ async def create_post(
     # new_post = cursor.fetchone()
     # conn.commit()
     print(current_user.email)
-    new_post = models.Post(**post.model_dump())
+    new_post = models.Post(owner_id=current_user.id, **post.model_dump())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
