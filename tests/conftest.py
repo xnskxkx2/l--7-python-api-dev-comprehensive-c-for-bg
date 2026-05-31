@@ -10,10 +10,6 @@ from app.database import Base, get_db
 from app.main import app
 from app.oauth2 import create_access_token
 
-from app import models
-# 1. Сначала убедись, что вверху conftest.py импортирован твой конфиг:
-from app.config import settings
-
 # 2. Сама строка подключения должна стать такой:
 SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test"
 
@@ -88,6 +84,7 @@ def test_posts(test_user, test_user2, session):
         },
         {"title": "2nd title", "content": "2nd content", "owner_id": test_user["id"]},
         {"title": "3rd title", "content": "3rd content", "owner_id": test_user["id"]},
+        {"title": "4th title", "content": "4th content", "owner_id": test_user2["id"]},
     ]
 
     def create_post_model(post):
